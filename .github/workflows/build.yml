@@ -1,0 +1,48 @@
+name: Build and Publish Container Image
+
+on:
+  # Trigger on pushes to main branch (creates :main tag)
+  push:
+    branches:
+      - main
+
+  # Trigger on GitHub releases (creates version tags)
+  release:
+    types: [published]
+
+  # Allow manual triggering
+  workflow_dispatch:
+
+# Required for signing images with cosign
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      # Step 2: Install Cosign for image signing
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v4.0.0
+        with:
+          cosign-release: 'v3.0.2'
+      # Step 3: Install Apptainer
+      - name: Install Apptainer
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y apptainer
+
+      # Step 4: Build the container image
+      - name: Build Container Image
+        run: |
+          # Define the image name and tag
+          IMAGE_NAME="rockylinux9.8_26.8.0"
+          # Build the container image using Apptainer
+          apptainer build --sandbox "${IMAGE_NAME}" ../defs/rockylinux9.def"
