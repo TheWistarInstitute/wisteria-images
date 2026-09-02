@@ -3,15 +3,7 @@ MirrorURL: https://download.rockylinux.org/pub/rocky/9/BaseOS/x86_64/os/
 Include: dnf
 
 %post
-dnf -y install --allowerasing \
-  NetworkManager \
-  basesystem \
-  bash \
-  curl-minimal \
-  kernel \
-  nfs-utils \
-  openssh-server \
-  systemd
+dnf -y update
 
 dnf -y remove \
   glibc-gconv-extra
