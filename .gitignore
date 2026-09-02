@@ -1,0 +1,9 @@
+# Local build leftovers
+*.tar
+*.oci
+*.sif
+
+# Editor junk
+.vscode/
+.idea/
+*~

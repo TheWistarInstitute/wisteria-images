@@ -1,0 +1,109 @@
+name: Build Warewulf node image
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    # GitHub schedules are UTC. 04:00 UTC is midnight Eastern during DST.
+    # If you need midnight Eastern during standard time, change this to 05:00 UTC.
+    - cron: '0 4 1 * *'
+  workflow_dispatch:
+    inputs:
+      rocky_version:
+        description: 'Rocky Linux release component for the tag'
+        required: false
+        default: '9.8'
+      tag_date:
+        description: 'Date component for the tag, e.g. 2026.8.0'
+        required: false
+        default: ''
+      warewulf_version:
+        description: 'Warewulf version used for warewulf-dracut RPM'
+        required: false
+        default: '4.7.0'
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: wisteria-rockylinux
+  ROCKY_VERSION: 9.8
+  WAREWULF_VERSION: 4.7.0
+
+jobs:
+  build:
+    name: Build and publish image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set image metadata
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          owner_lc="$(printf '%s' "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')"
+          rocky_version="${{ inputs.rocky_version || '' }}"
+          tag_date="${{ inputs.tag_date || '' }}"
+          warewulf_version="${{ inputs.warewulf_version || '' }}"
+
+          if [ -z "${rocky_version}" ]; then
+            rocky_version="${ROCKY_VERSION}"
+          fi
+
+          if [ -z "${warewulf_version}" ]; then
+            warewulf_version="${WAREWULF_VERSION}"
+          fi
+
+          if [ -z "${tag_date}" ]; then
+            # Produces tags like 2026.8.0 on the first day of August 2026.
+            tag_date="$(date -u '+%Y.%-m.0')"
+          fi
+
+          image_ref="${REGISTRY}/${owner_lc}/${IMAGE_NAME}"
+          version_tag="${rocky_version}_${tag_date}"
+
+          {
+            echo "owner_lc=${owner_lc}"
+            echo "rocky_version=${rocky_version}"
+            echo "tag_date=${tag_date}"
+            echo "warewulf_version=${warewulf_version}"
+            echo "image_ref=${image_ref}"
+            echo "version_tag=${version_tag}"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Warewulf image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          build-args: |
+            WAREWULF_VERSION=${{ steps.meta.outputs.warewulf_version }}
+          tags: |
+            ${{ steps.meta.outputs.image_ref }}:${{ steps.meta.outputs.version_tag }}
+          labels: |
+            org.opencontainers.image.title=${{ env.IMAGE_NAME }}
+            org.opencontainers.image.description=Warewulf Rocky Linux ${{ steps.meta.outputs.rocky_version }} node image for Wisteria
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.version=${{ steps.meta.outputs.version_tag }}

@@ -1,0 +1,6 @@
+# Warewulf image build excludes.
+# Patterns use Go filepath.Match semantics; see Warewulf image docs.
+# Keep this list conservative. Add site-specific cache/log paths only after testing.
+
+/boot
+/usr/share/GeoIP
