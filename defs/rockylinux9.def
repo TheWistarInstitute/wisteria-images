@@ -1,6 +1,5 @@
-Bootstrap: yum
-MirrorURL: https://download.rockylinux.org/pub/rocky/9/BaseOS/x86_64/os/
-Include: dnf
+Bootstrap: docker
+From: ghcr.io/warewulf/warewulf-rockylinux:9
 
 %post
 dnf -y update
