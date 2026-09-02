@@ -46,4 +46,4 @@ jobs:
           # Define the image name and tag
           IMAGE_NAME="rockylinux9.8_26.8.0"
           # Build the container image using Apptainer
-          apptainer build --sandbox "${IMAGE_NAME}" ../defs/rockylinux9.def
+          apptainer build --sandbox "${IMAGE_NAME}" defs/rockylinux9.def
