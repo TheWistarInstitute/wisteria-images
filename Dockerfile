@@ -11,12 +11,8 @@ ARG WAREWULF_VERSION=4.7.0
 # and site-required boot/runtime tooling.
 RUN dnf update -y \
     && dnf install -y \
-      "https://github.com/warewulf/warewulf/releases/download/v${WAREWULF_VERSION}/warewulf-dracut-${WAREWULF_VERSION}-1.el9.noarch.rpm" \
       vim \
     && dnf clean all
-
-# Generate initramfs with Warewulf support.
-RUN dracut --force --no-hostonly --add wwinit --add ignition --add mdraid --regenerate-all
 
 # Copy Warewulf-specific configuration files.
 COPY excludes /etc/warewulf/excludes
