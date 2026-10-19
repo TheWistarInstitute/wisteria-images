@@ -24,9 +24,9 @@ RUN dnf update -y \
     && dnf clean all 
 
 # install Slurm packages from Wistar's GitHub releases
-RUN dnf install -y https://github.com/TheWistarInstitute/wisteria-slurm-builds/releases/download/slurm-26.05.4-rocky9/slurm-26.05.4-1.el9.x86_64.rpm \
-		https://github.com/TheWistarInstitute/wisteria-slurm-builds/releases/download/slurm-26.05.4-rocky9/slurm-perlapi-26.05.4-1.el9.x86_64.rpm \
-		https://github.com/TheWistarInstitute/wisteria-slurm-builds/releases/download/slurm-26.05.4-rocky9/slurm-slurmd-26.05.4-1.el9.x86_64.rpm
+RUN dnf install -y https://github.com/TheWistarInstitute/wisteria-slurm-builds/releases/download/slurm-26.05.4-rocky9/slurm-26.05.4-1.el9.x86_64.rpm
+RUN dnf install -y https://github.com/TheWistarInstitute/wisteria-slurm-builds/releases/download/slurm-26.05.4-rocky9/slurm-perlapi-26.05.4-1.el9.x86_64.rpm
+RUN dnf install -y https://github.com/TheWistarInstitute/wisteria-slurm-builds/releases/download/slurm-26.05.4-rocky9/slurm-slurmd-26.05.4-1.el9.x86_64.rpm
 
 # Generate initramfs with Warewulf support
 RUN dracut --force --no-hostonly --add wwinit --add ignition --add mdraid --regenerate-all
