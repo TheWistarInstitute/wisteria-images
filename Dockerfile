@@ -21,8 +21,8 @@ RUN dracut --force --no-hostonly --add wwinit --add ignition --add mdraid --rege
 RUN dnf clean all
 
 # Copy Warewulf-specific configuration files.
-COPY ./images/excludes /etc/warewulf/excludes
-COPY ./images/image_exit.sh /etc/warewulf/image_exit.sh
+COPY ./excludes /etc/warewulf/excludes
+COPY ./image_exit.sh /etc/warewulf/image_exit.sh
 
 # Run cleanup script so the published image is not carrying build caches.
 RUN sh /etc/warewulf/image_exit.sh
