@@ -7,18 +7,22 @@ FROM ghcr.io/warewulf/warewulf-rockylinux:9
 
 ARG WAREWULF_VERSION=4.7.1
 
-# Install updates, the Warewulf dracut module for network boot support,
-# and site-required boot/runtime tooling.
-RUN dnf update -y
-RUN dnf install epel-release -y
-RUN dnf install -y \
-		vim neovim \
-		Lmod \
-		autofs \
-        realmd oddjob oddjob-mkhomedir sssd adcli krb5-workstation
-RUN dnf install -y https://github.com/warewulf/warewulf/releases/download/v${WAREWULF_VERSION}/warewulf-dracut-${WAREWULF_VERSION}-1.el9.noarch.rpm -o warewulf-dracut-${WAREWULF_VERSION}-1.el9.noarch.rpm
+# Install essential packages, remove SELinux, and install Warewulf dracut module
+RUN dnf update -y \
+    # Install Warewulf dracut module for network boot support
+    && dnf install -y \
+      https://github.com/warewulf/warewulf/releases/download/v${WAREWULF_VERSION}/warewulf-dracut-${WAREWULF_VERSION}-1.el9.noarch.rpm \
+      ignition \
+      mdadm \
+	  epel-release \
+	  vim neovim \
+	  Lmod \
+	  autofs \
+	  realmd oddjob oddjob-mkhomedir sssd adcli krb5-workstation \
+    && dnf clean all 
+    
+# Generate initramfs with Warewulf support
 RUN dracut --force --no-hostonly --add wwinit --add ignition --add mdraid --regenerate-all
-RUN dnf clean all
 
 # Copy Warewulf-specific configuration files.
 COPY ./excludes /etc/warewulf/excludes
