@@ -16,7 +16,7 @@ RUN dnf update -y \
       https://github.com/warewulf/warewulf/releases/download/v${WAREWULF_VERSION}/warewulf-dracut-${WAREWULF_VERSION}-1.el9.noarch.rpm \
       ignition \
       mdadm \
-	  vim neovim \
+	  vim \
 	  Lmod \
 	  autofs \
 	  realmd oddjob oddjob-mkhomedir sssd adcli krb5-workstation \
