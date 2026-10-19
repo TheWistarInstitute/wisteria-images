@@ -6,21 +6,27 @@
 FROM ghcr.io/warewulf/warewulf-rockylinux:9
 
 ARG WAREWULF_VERSION=4.7.1
+ARG SLURM_VERSION=26.06.4
 
 # Install essential packages, remove SELinux, and install Warewulf dracut module
 RUN dnf update -y \
     # Install Warewulf dracut module for network boot support
+	&& dnf install -y epel-release \
     && dnf install -y \
       https://github.com/warewulf/warewulf/releases/download/v${WAREWULF_VERSION}/warewulf-dracut-${WAREWULF_VERSION}-1.el9.noarch.rpm \
       ignition \
       mdadm \
-	  epel-release \
 	  vim neovim \
 	  Lmod \
 	  autofs \
 	  realmd oddjob oddjob-mkhomedir sssd adcli krb5-workstation \
     && dnf clean all 
-    
+
+# install Slurm packages from Wistar's GitHub releases
+RUN dnf install -y https://github.com/TheWistarInstitute/wisteria-slurm-builds/releases/download/slurm-${SLURM_VERSION}-rocky9/slurm-${SLURM_VERSION}-1.el9.x86_64.rpm \
+		https://github.com/TheWistarInstitute/wisteria-slurm-builds/releases/download/slurm-${SLURM_VERSION}-rocky9/slurm-perlapi-${SLURM_VERSION}-1.el9.x86_64.rpm \
+		https://github.com/TheWistarInstitute/wisteria-slurm-builds/releases/download/slurm-${SLURM_VERSION}-rocky9/slurm-slurmd-${SLURM_VERSION}-1.el9.x86_64.rpm
+
 # Generate initramfs with Warewulf support
 RUN dracut --force --no-hostonly --add wwinit --add ignition --add mdraid --regenerate-all
 
